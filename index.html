@@ -3,48 +3,91 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>LIPFORGE AI</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#080b16;color:#f4f7ff;font-family:Arial,sans-serif}
-header{padding:20px 6%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #263047}
-.logo{font-size:23px;font-weight:900;color:#36d9ff}
-main{max-width:850px;margin:45px auto;padding:18px}
-.panel{background:#11182a;border:1px solid #283650;border-radius:17px;padding:24px;margin:20px 0}
+header{padding:20px 6%;border-bottom:1px solid #263047}
+.logo{font-size:24px;font-weight:900;color:#36d9ff}
+main{max-width:650px;margin:35px auto;padding:16px}
+.panel{background:#11182a;border:1px solid #283650;border-radius:17px;padding:23px;margin:18px 0}
 h1 span{color:#36d9ff}
 p{color:#aab6cc;line-height:1.6}
-input{width:100%;padding:14px;margin:8px 0 16px;background:#080e1c;border:1px solid #34435d;border-radius:9px;color:white}
-label{display:block;color:#dce7ff}
-button{padding:14px;border:0;border-radius:9px;background:#20c9ee;color:#06101a;font-weight:bold;cursor:pointer;margin:5px 0;width:100%}
-button.secondary{background:#263650;color:white}
-button:disabled{opacity:.5}
+label{display:block;margin:14px 0 7px}
+input{width:100%;padding:14px;background:#080e1c;border:1px solid #34435d;border-radius:9px;color:white}
+.password-wrap{display:flex;gap:7px}
+.password-wrap input{flex:1;min-width:0}
+.password-wrap button{width:auto;margin:0;padding:0 12px}
+button{width:100%;padding:14px;border:0;border-radius:9px;background:#20c9ee;color:#06101a;font-weight:bold;margin-top:14px;cursor:pointer}
+.secondary{background:#263650;color:white}
+.link{background:none;color:#36d9ff;padding:8px;width:auto;text-decoration:underline}
+#message{color:#36d9ff;margin-top:15px;overflow-wrap:anywhere}
 .hidden{display:none}
-#message{padding:12px;color:#36d9ff;overflow-wrap:anywhere}
-.credit{color:#36d9ff;font-size:25px;font-weight:bold}
-footer{text-align:center;padding:25px;color:#8290a8}
+.credit{font-size:25px;color:#36d9ff;font-weight:bold}
+footer{text-align:center;color:#8290a8;padding:25px}
 </style>
 </head>
 <body>
-<header>
-<div class="logo">LIPFORGE AI</div>
-<div id="accountStatus">Not signed in</div>
-</header>
-
+<header><div class="logo">LIPFORGE AI</div></header>
 <main>
+
 <section class="panel" id="authPanel">
 <h1>Welcome to <span>LIPFORGE AI</span></h1>
-<p>Create an account or sign in to access your studio.</p>
+<p>Sign in or create your account.</p>
 
+<div id="loginForm">
 <label>Email address</label>
-<input id="email" type="email" placeholder="Enter your email">
+<input id="email" type="email" placeholder="Your Gmail or email address">
 
 <label>Password</label>
-<input id="password" type="password" placeholder="At least 6 characters">
+<div class="password-wrap">
+<input id="password" type="password" placeholder="Enter password">
+<button type="button" class="secondary" onclick="togglePassword('password',this)">Show</button>
+</div>
 
-<button id="signup">Create account</button>
-<button id="login" class="secondary">Sign in</button>
+<button id="login">Sign in</button>
+<button id="signup" class="secondary">Create account</button>
+<button id="forgot" class="link">Forgot password?</button>
+</div>
+
+<div id="verifyForm" class="hidden">
+<h2>Verify your email</h2>
+<p>Enter the verification code sent to your email inbox.</p>
+<label>Email verification code</label>
+<input id="verifyCode" inputmode="numeric" autocomplete="one-time-code" placeholder="Enter code">
+<button id="verifyButton">Verify email</button>
+<button id="resend" class="secondary">Resend code</button>
+</div>
+
+<div id="resetRequest" class="hidden">
+<h2>Reset password</h2>
+<p>We'll send a recovery code to your email address.</p>
+<label>Email address</label>
+<input id="resetEmail" type="email" placeholder="Your email address">
+<button id="sendReset">Send recovery code</button>
+<button class="secondary" onclick="showForm('loginForm')">Back to login</button>
+</div>
+
+<div id="resetForm" class="hidden">
+<h2>Create a new password</h2>
+<p>Enter the recovery code from your email and choose a new password.</p>
+<label>Recovery code</label>
+<input id="recoveryCode" inputmode="numeric" autocomplete="one-time-code" placeholder="Enter recovery code">
+<label>New password</label>
+<div class="password-wrap">
+<input id="newPassword" type="password" placeholder="New password">
+<button type="button" class="secondary" onclick="togglePassword('newPassword',this)">Show</button>
+</div>
+<label>Confirm new password</label>
+<div class="password-wrap">
+<input id="confirmPassword" type="password" placeholder="Confirm password">
+<button type="button" class="secondary" onclick="togglePassword('confirmPassword',this)">Show</button>
+</div>
+<button id="changePassword">Update password</button>
+</div>
+
 <div id="message" aria-live="polite"></div>
 </section>
 
@@ -54,12 +97,11 @@ footer{text-align:center;padding:25px;color:#8290a8}
 <p id="userEmail"></p>
 <p>Your available credits</p>
 <div class="credit" id="credits">Loading...</div>
-<button class="secondary" id="switchAccount">Switch account / Sign out</button>
+<button id="switchAccount" class="secondary">Switch account / Sign out</button>
 </div>
 
-<div class="panel" id="studio">
+<div class="panel">
 <h2>AI Lip Sync Studio</h2>
-<p>Upload your original video and replacement audio.</p>
 <label>Original video</label>
 <input id="video" type="file" accept="video/*">
 <label>Audio file</label>
@@ -69,172 +111,189 @@ footer{text-align:center;padding:25px;color:#8290a8}
 </div>
 </section>
 
-<section class="panel">
-<h2>About LIPFORGE AI</h2>
-<p>Our goal is natural mouth movement, accurate speech synchronization and realistic facial consistency.</p>
-</section>
+<footer>© 2026 LIPFORGE AI</footer>
 </main>
 
-<footer>© 2026 LIPFORGE AI</footer>
-
 <script>
-const SUPABASE_URL = "https://zxjntfornzjtzhvvdufw.supabase.co";
-const SUPABASE_KEY = "sb_publishable_vQ_8NmjRuqGssL6vo5Ksyw_M61b4Hd3";
-
-const db = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
+const URL = "https://zxjntfornzjtzhvvdufw.supabase.co";
+const KEY = "sb_publishable_vQ_8NmjRuqGssL6vo5Ksyw_M61b4Hd3";
+const db = window.supabase.createClient(URL,KEY);
 
 const $ = id => document.getElementById(id);
+let pendingEmail = "";
 
-function message(text) {
-  $("message").textContent = text;
+function msg(t){$("message").textContent=t;}
+
+function showForm(name){
+["loginForm","verifyForm","resetRequest","resetForm"].forEach(id=>{
+$(id).classList.add("hidden");
+});
+$(name).classList.remove("hidden");
+msg("");
 }
 
-async function loadAccount(user) {
-  $("authPanel").classList.add("hidden");
-  $("dashboard").classList.remove("hidden");
-  $("accountStatus").textContent = "Signed in";
-  $("userEmail").textContent = user.email || "";
-
-  $("credits").textContent = "Loading...";
-
-  const {data, error} = await db
-    .from("profiles")
-    .select("credits")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  if(error) {
-    $("credits").textContent = "Unavailable";
-    $("studioMessage").textContent = error.message;
-    return;
-  }
-
-  if(!data) {
-    $("credits").textContent = "Profile not found";
-    return;
-  }
-
-  $("credits").textContent = data.credits + " credits";
+function togglePassword(id,button){
+const field=$(id);
+const visible=field.type==="password";
+field.type=visible?"text":"password";
+button.textContent=visible?"Hide":"Show";
 }
 
-function showLogin() {
-  $("dashboard").classList.add("hidden");
-  $("authPanel").classList.remove("hidden");
-  $("accountStatus").textContent = "Not signed in";
-  $("credits").textContent = "";
+async function loadAccount(user){
+$("authPanel").classList.add("hidden");
+$("dashboard").classList.remove("hidden");
+$("userEmail").textContent=user.email||"";
+$("credits").textContent="Loading...";
+
+const {data,error}=await db.from("profiles")
+.select("credits").eq("id",user.id).maybeSingle();
+
+$("credits").textContent=error?"Unavailable":
+data?data.credits+" credits":"Profile not found";
 }
 
-$("signup").addEventListener("click", async () => {
-  const email = $("email").value.trim();
-  const password = $("password").value;
+function showLogin(){
+$("dashboard").classList.add("hidden");
+$("authPanel").classList.remove("hidden");
+showForm("loginForm");
+}
 
-  if(!email || password.length < 6) {
-    message("Enter a valid email and password of at least 6 characters.");
-    return;
-  }
+$("signup").onclick=async()=>{
+const email=$("email").value.trim();
+const password=$("password").value;
 
-  $("signup").disabled = true;
-  message("Creating your account...");
+if(!email||password.length<6){
+msg("Enter a valid email and password of at least 6 characters.");
+return;
+}
 
-  const {data, error} = await db.auth.signUp({
-    email,
-    password
-  });
+msg("Creating account...");
+const {data,error}=await db.auth.signUp({email,password});
 
-  $("signup").disabled = false;
+if(error){msg(error.message);return;}
 
-  if(error) {
-    message(error.message);
-    return;
-  }
+pendingEmail=email;
+showForm("verifyForm");
 
-  if(data.session) {
-    await loadAccount(data.user);
-    message("Account created successfully!");
-  } else {
-    message("Account created. Check your email to confirm it, then sign in.");
-  }
+if(data.session){
+msg("Account created and signed in.");
+await loadAccount(data.user);
+}else{
+msg("Check your email for the verification code.");
+}
+};
+
+$("verifyButton").onclick=async()=>{
+const token=$("verifyCode").value.trim();
+
+if(!pendingEmail||!token){msg("Enter your email verification code.");return;}
+
+msg("Verifying...");
+const {data,error}=await db.auth.verifyOtp({
+email:pendingEmail,
+token,
+type:"signup"
 });
 
-$("login").addEventListener("click", async () => {
-  const email = $("email").value.trim();
-  const password = $("password").value;
+if(error){msg(error.message);return;}
 
-  if(!email || !password) {
-    message("Enter your email and password.");
-    return;
-  }
+msg("Email verified successfully!");
+await loadAccount(data.user);
+};
 
-  $("login").disabled = true;
-  message("Signing in...");
+$("resend").onclick=async()=>{
+if(!pendingEmail){msg("Please create your account again.");return;}
+msg("Sending a new code...");
+const {error}=await db.auth.resend({
+type:"signup",
+email:pendingEmail
+});
+msg(error?error.message:"A new verification code has been sent.");
+};
 
-  const {data, error} = await db.auth.signInWithPassword({
-    email,
-    password
-  });
+$("login").onclick=async()=>{
+const email=$("email").value.trim();
+const password=$("password").value;
+if(!email||!password){msg("Enter your email and password.");return;}
 
-  $("login").disabled = false;
+msg("Signing in...");
+const {data,error}=await db.auth.signInWithPassword({email,password});
+if(error){msg(error.message);return;}
+await loadAccount(data.user);
+};
 
-  if(error) {
-    message(error.message);
-    return;
-  }
+$("forgot").onclick=()=>{
+$("resetEmail").value=$("email").value.trim();
+showForm("resetRequest");
+};
 
-  await loadAccount(data.user);
-  message("Welcome back!");
+$("sendReset").onclick=async()=>{
+const email=$("resetEmail").value.trim();
+if(!email){msg("Enter your email address.");return;}
+
+msg("Sending recovery code...");
+const {error}=await db.auth.resetPasswordForEmail(email);
+
+if(error){msg(error.message);return;}
+
+pendingEmail=email;
+showForm("resetForm");
+msg("Check your email for the recovery code.");
+};
+
+$("changePassword").onclick=async()=>{
+const token=$("recoveryCode").value.trim();
+const password=$("newPassword").value;
+const confirm=$("confirmPassword").value;
+
+if(!token||!password){msg("Enter the recovery code and new password.");return;}
+if(password.length<6){msg("Password must have at least 6 characters.");return;}
+if(password!==confirm){msg("Your passwords do not match.");return;}
+
+msg("Verifying recovery code...");
+const {data,error}=await db.auth.verifyOtp({
+email:pendingEmail,
+token,
+type:"recovery"
 });
 
-$("switchAccount").addEventListener("click", async () => {
-  const confirmed = confirm(
-    "Sign out of this account and sign in with another account?"
-  );
+if(error){msg(error.message);return;}
 
-  if(!confirmed) return;
+const {error:updateError}=await db.auth.updateUser({password});
 
-  const {error} = await db.auth.signOut();
+if(updateError){msg(updateError.message);return;}
 
-  if(error) {
-    alert(error.message);
-    return;
-  }
+msg("Password updated successfully. You can now sign in.");
+await db.auth.signOut();
+showLogin();
+};
 
-  $("email").value = "";
-  $("password").value = "";
-  showLogin();
-  message("Signed out. You can now sign in to another account.");
+$("switchAccount").onclick=async()=>{
+if(!confirm("Sign out and switch to another account?"))return;
+const {error}=await db.auth.signOut();
+if(error){alert(error.message);return;}
+$("email").value="";
+$("password").value="";
+showLogin();
+};
+
+$("generate").onclick=()=>{
+if(!$("video").files[0]||!$("audio").files[0]){
+$("studioMessage").textContent="Upload both video and audio.";
+return;
+}
+$("studioMessage").textContent=
+"Files selected. The real AI processing server still needs to be connected.";
+};
+
+db.auth.onAuthStateChange((event,session)=>{
+if(session?.user)loadAccount(session.user);
+else showLogin();
 });
 
-$("generate").addEventListener("click", () => {
-  const video = $("video").files[0];
-  const audio = $("audio").files[0];
-
-  if(!video || !audio) {
-    $("studioMessage").textContent =
-      "Please select both a video and an audio file.";
-    return;
-  }
-
-  $("studioMessage").textContent =
-    "Files selected. The real AI processing server has not been connected yet.";
-});
-
-db.auth.onAuthStateChange((event, session) => {
-  if(session?.user) {
-    loadAccount(session.user);
-  } else {
-    showLogin();
-  }
-});
-
-(async () => {
-  const {data} = await db.auth.getSession();
-
-  if(data.session?.user) {
-    await loadAccount(data.session.user);
-  }
+(async()=>{
+const {data}=await db.auth.getSession();
+if(data.session?.user)await loadAccount(data.session.user);
 })();
 </script>
 </body>
