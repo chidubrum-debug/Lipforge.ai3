@@ -1,0 +1,65 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LIPFORGE AI | Realistic AI Lip Sync</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080b16;color:#f4f7ff;font-family:Arial,sans-serif}
+header{padding:22px 7%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #20283c}
+.logo{font-size:24px;font-weight:900;color:#36d9ff}
+nav a{color:#c7d2e8;text-decoration:none;margin-left:18px}
+main{max-width:1000px;margin:65px auto;padding:20px}
+.hero{text-align:center}
+h1{font-size:clamp(38px,7vw,65px);margin:15px 0}
+h1 span{color:#36d9ff}
+p{color:#aab6cc;line-height:1.7}
+.panel{background:#11182a;border:1px solid #283650;border-radius:18px;padding:25px;margin-top:35px}
+label{display:block;margin:20px 0 9px;color:#dce7ff}
+input{width:100%;padding:14px;background:#080e1c;border:1px solid #34435d;border-radius:9px;color:white}
+button{background:#20c9ee;color:#06101a;border:0;padding:15px 22px;border-radius:9px;font-weight:bold;width:100%;margin-top:22px}
+button:disabled{opacity:.5}
+#status{margin-top:20px;text-align:center}
+footer{text-align:center;padding:30px;color:#8290a8}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">LIPFORGE AI</div>
+<nav><a href="#studio">Studio</a><a href="#about">About</a></nav>
+</header>
+<main>
+<section class="hero">
+<p>THE NEXT GENERATION OF AI VIDEO</p>
+<h1>Perfect your <span>lip sync.</span></h1>
+<p>Transform your videos with intelligent AI-powered lip synchronization.</p>
+</section>
+<section class="panel" id="studio">
+<h2>AI Lip Sync Studio</h2>
+<p>Upload your original video and replacement audio.</p>
+<label for="video">Original video</label>
+<input id="video" type="file" accept="video/*">
+<label for="audio">Audio file</label>
+<input id="audio" type="file" accept="audio/*">
+<button id="generate">Prepare generation</button>
+<div id="status">Your studio is ready.</div>
+</section>
+<section id="about">
+<h2>Built for realistic results</h2>
+<p>Our planned AI processing engine will focus on accurate mouth movements, facial consistency and natural speech synchronization.</p>
+</section>
+</main>
+<footer>© 2026 LIPFORGE AI</footer>
+<script>
+document.getElementById('generate').addEventListener('click',()=>{
+const video=document.getElementById('video').files[0];
+const audio=document.getElementById('audio').files[0];
+const status=document.getElementById('status');
+if(!video||!audio){status.textContent='Please upload both a video and an audio file.';return;}
+status.textContent='Files selected. AI processing backend is not connected yet.';
+});
+</script>
+</body>
+</html>
