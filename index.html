@@ -3,63 +3,239 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LIPFORGE AI | Realistic AI Lip Sync</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LIPFORGE AI</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#080b16;color:#f4f7ff;font-family:Arial,sans-serif}
-header{padding:22px 7%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #20283c}
-.logo{font-size:24px;font-weight:900;color:#36d9ff}
-nav a{color:#c7d2e8;text-decoration:none;margin-left:18px}
-main{max-width:1000px;margin:65px auto;padding:20px}
-.hero{text-align:center}
-h1{font-size:clamp(38px,7vw,65px);margin:15px 0}
+header{padding:20px 6%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #263047}
+.logo{font-size:23px;font-weight:900;color:#36d9ff}
+main{max-width:850px;margin:45px auto;padding:18px}
+.panel{background:#11182a;border:1px solid #283650;border-radius:17px;padding:24px;margin:20px 0}
 h1 span{color:#36d9ff}
-p{color:#aab6cc;line-height:1.7}
-.panel{background:#11182a;border:1px solid #283650;border-radius:18px;padding:25px;margin-top:35px}
-label{display:block;margin:20px 0 9px;color:#dce7ff}
-input{width:100%;padding:14px;background:#080e1c;border:1px solid #34435d;border-radius:9px;color:white}
-button{background:#20c9ee;color:#06101a;border:0;padding:15px 22px;border-radius:9px;font-weight:bold;width:100%;margin-top:22px}
+p{color:#aab6cc;line-height:1.6}
+input{width:100%;padding:14px;margin:8px 0 16px;background:#080e1c;border:1px solid #34435d;border-radius:9px;color:white}
+label{display:block;color:#dce7ff}
+button{padding:14px;border:0;border-radius:9px;background:#20c9ee;color:#06101a;font-weight:bold;cursor:pointer;margin:5px 0;width:100%}
+button.secondary{background:#263650;color:white}
 button:disabled{opacity:.5}
-#status{margin-top:20px;text-align:center}
-footer{text-align:center;padding:30px;color:#8290a8}
+.hidden{display:none}
+#message{padding:12px;color:#36d9ff;overflow-wrap:anywhere}
+.credit{color:#36d9ff;font-size:25px;font-weight:bold}
+footer{text-align:center;padding:25px;color:#8290a8}
 </style>
 </head>
 <body>
 <header>
 <div class="logo">LIPFORGE AI</div>
-<nav><a href="#studio">Studio</a><a href="#about">About</a></nav>
+<div id="accountStatus">Not signed in</div>
 </header>
+
 <main>
-<section class="hero">
-<p>THE NEXT GENERATION OF AI VIDEO</p>
-<h1>Perfect your <span>lip sync.</span></h1>
-<p>Transform your videos with intelligent AI-powered lip synchronization.</p>
+<section class="panel" id="authPanel">
+<h1>Welcome to <span>LIPFORGE AI</span></h1>
+<p>Create an account or sign in to access your studio.</p>
+
+<label>Email address</label>
+<input id="email" type="email" placeholder="Enter your email">
+
+<label>Password</label>
+<input id="password" type="password" placeholder="At least 6 characters">
+
+<button id="signup">Create account</button>
+<button id="login" class="secondary">Sign in</button>
+<div id="message" aria-live="polite"></div>
 </section>
-<section class="panel" id="studio">
+
+<section id="dashboard" class="hidden">
+<div class="panel">
+<h2>Your account</h2>
+<p id="userEmail"></p>
+<p>Your available credits</p>
+<div class="credit" id="credits">Loading...</div>
+<button class="secondary" id="switchAccount">Switch account / Sign out</button>
+</div>
+
+<div class="panel" id="studio">
 <h2>AI Lip Sync Studio</h2>
 <p>Upload your original video and replacement audio.</p>
-<label for="video">Original video</label>
+<label>Original video</label>
 <input id="video" type="file" accept="video/*">
-<label for="audio">Audio file</label>
+<label>Audio file</label>
 <input id="audio" type="file" accept="audio/*">
 <button id="generate">Prepare generation</button>
-<div id="status">Your studio is ready.</div>
+<div id="studioMessage"></div>
+</div>
 </section>
-<section id="about">
-<h2>Built for realistic results</h2>
-<p>Our planned AI processing engine will focus on accurate mouth movements, facial consistency and natural speech synchronization.</p>
+
+<section class="panel">
+<h2>About LIPFORGE AI</h2>
+<p>Our goal is natural mouth movement, accurate speech synchronization and realistic facial consistency.</p>
 </section>
 </main>
+
 <footer>© 2026 LIPFORGE AI</footer>
+
 <script>
-document.getElementById('generate').addEventListener('click',()=>{
-const video=document.getElementById('video').files[0];
-const audio=document.getElementById('audio').files[0];
-const status=document.getElementById('status');
-if(!video||!audio){status.textContent='Please upload both a video and an audio file.';return;}
-status.textContent='Files selected. AI processing backend is not connected yet.';
+const SUPABASE_URL = "https://zxjntfornzjtzhvvdufw.supabase.co";
+const SUPABASE_KEY = "sb_publishable_vQ_8NmjRuqGssL6vo5Ksyw_M61b4Hd3";
+
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+const $ = id => document.getElementById(id);
+
+function message(text) {
+  $("message").textContent = text;
+}
+
+async function loadAccount(user) {
+  $("authPanel").classList.add("hidden");
+  $("dashboard").classList.remove("hidden");
+  $("accountStatus").textContent = "Signed in";
+  $("userEmail").textContent = user.email || "";
+
+  $("credits").textContent = "Loading...";
+
+  const {data, error} = await db
+    .from("profiles")
+    .select("credits")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if(error) {
+    $("credits").textContent = "Unavailable";
+    $("studioMessage").textContent = error.message;
+    return;
+  }
+
+  if(!data) {
+    $("credits").textContent = "Profile not found";
+    return;
+  }
+
+  $("credits").textContent = data.credits + " credits";
+}
+
+function showLogin() {
+  $("dashboard").classList.add("hidden");
+  $("authPanel").classList.remove("hidden");
+  $("accountStatus").textContent = "Not signed in";
+  $("credits").textContent = "";
+}
+
+$("signup").addEventListener("click", async () => {
+  const email = $("email").value.trim();
+  const password = $("password").value;
+
+  if(!email || password.length < 6) {
+    message("Enter a valid email and password of at least 6 characters.");
+    return;
+  }
+
+  $("signup").disabled = true;
+  message("Creating your account...");
+
+  const {data, error} = await db.auth.signUp({
+    email,
+    password
+  });
+
+  $("signup").disabled = false;
+
+  if(error) {
+    message(error.message);
+    return;
+  }
+
+  if(data.session) {
+    await loadAccount(data.user);
+    message("Account created successfully!");
+  } else {
+    message("Account created. Check your email to confirm it, then sign in.");
+  }
 });
+
+$("login").addEventListener("click", async () => {
+  const email = $("email").value.trim();
+  const password = $("password").value;
+
+  if(!email || !password) {
+    message("Enter your email and password.");
+    return;
+  }
+
+  $("login").disabled = true;
+  message("Signing in...");
+
+  const {data, error} = await db.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  $("login").disabled = false;
+
+  if(error) {
+    message(error.message);
+    return;
+  }
+
+  await loadAccount(data.user);
+  message("Welcome back!");
+});
+
+$("switchAccount").addEventListener("click", async () => {
+  const confirmed = confirm(
+    "Sign out of this account and sign in with another account?"
+  );
+
+  if(!confirmed) return;
+
+  const {error} = await db.auth.signOut();
+
+  if(error) {
+    alert(error.message);
+    return;
+  }
+
+  $("email").value = "";
+  $("password").value = "";
+  showLogin();
+  message("Signed out. You can now sign in to another account.");
+});
+
+$("generate").addEventListener("click", () => {
+  const video = $("video").files[0];
+  const audio = $("audio").files[0];
+
+  if(!video || !audio) {
+    $("studioMessage").textContent =
+      "Please select both a video and an audio file.";
+    return;
+  }
+
+  $("studioMessage").textContent =
+    "Files selected. The real AI processing server has not been connected yet.";
+});
+
+db.auth.onAuthStateChange((event, session) => {
+  if(session?.user) {
+    loadAccount(session.user);
+  } else {
+    showLogin();
+  }
+});
+
+(async () => {
+  const {data} = await db.auth.getSession();
+
+  if(data.session?.user) {
+    await loadAccount(data.session.user);
+  }
+})();
 </script>
 </body>
 </html>
