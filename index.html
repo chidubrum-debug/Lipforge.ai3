@@ -3,298 +3,159 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LIPFORGE AI</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LIPFORGE AI — AI Lip Sync Studio</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#080b16;color:#f4f7ff;font-family:Arial,sans-serif}
-header{padding:20px 6%;border-bottom:1px solid #263047}
-.logo{font-size:24px;font-weight:900;color:#36d9ff}
-main{max-width:650px;margin:35px auto;padding:16px}
-.panel{background:#11182a;border:1px solid #283650;border-radius:17px;padding:23px;margin:18px 0}
-h1 span{color:#36d9ff}
-p{color:#aab6cc;line-height:1.6}
-label{display:block;margin:14px 0 7px}
-input{width:100%;padding:14px;background:#080e1c;border:1px solid #34435d;border-radius:9px;color:white}
-.password-wrap{display:flex;gap:7px}
-.password-wrap input{flex:1;min-width:0}
-.password-wrap button{width:auto;margin:0;padding:0 12px}
-button{width:100%;padding:14px;border:0;border-radius:9px;background:#20c9ee;color:#06101a;font-weight:bold;margin-top:14px;cursor:pointer}
-.secondary{background:#263650;color:white}
-.link{background:none;color:#36d9ff;padding:8px;width:auto;text-decoration:underline}
-#message{color:#36d9ff;margin-top:15px;overflow-wrap:anywhere}
-.hidden{display:none}
-.credit{font-size:25px;color:#36d9ff;font-weight:bold}
-footer{text-align:center;color:#8290a8;padding:25px}
+body{margin:0;background:#050505;color:#f5f5f5;font-family:Arial,sans-serif}
+header{height:72px;border-bottom:1px solid #202020;display:flex;align-items:center;justify-content:space-between;padding:0 6%;position:sticky;top:0;background:#050505;z-index:5}
+.logo{font-size:21px;font-weight:900;letter-spacing:2px}
+.logo span{color:#00c8ff}
+.counter{border:1px solid #222;border-radius:30px;padding:10px 15px;color:#00c8ff;font-size:13px}
+main{max-width:1100px;margin:auto;padding:35px 20px 70px}
+.intro{text-align:center;margin:25px 0 35px}
+.intro h1{font-size:clamp(30px,6vw,52px);margin:0 0 12px;letter-spacing:-2px}
+.intro h1 span{color:#00c8ff}
+.intro p{color:#888;line-height:1.6}
+.panels{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.panel{background:#0c0c0c;border:1px solid #242424;border-radius:18px;padding:20px;min-width:0}
+.panel h2{font-size:17px;margin:0 0 6px}
+.sub{font-size:12px;color:#777;margin-bottom:18px}
+.upload{border:1px dashed #343434;border-radius:13px;min-height:175px;display:flex;align-items:center;justify-content:center;text-align:center;padding:15px;cursor:pointer;background:#080808;transition:.2s}
+.upload:active{border-color:#00c8ff}
+.upload strong{display:block;margin:10px 0 6px}
+.upload small{color:#777}
+.upload input{display:none}
+.icon{font-size:30px;color:#00c8ff}
+.preview{width:100%;margin-top:16px;display:none;border-radius:12px;background:#000}
+audio{width:100%;margin-top:17px;display:none}
+.fileinfo{font-size:12px;color:#aaa;margin-top:10px;overflow-wrap:anywhere}
+.remove{background:none;color:#888;border:0;padding:10px 0;cursor:pointer;display:none}
+.actions{margin-top:25px}
+.generate{width:100%;padding:17px;border:0;border-radius:12px;background:linear-gradient(100deg,#007da8,#00c8ff);color:#001018;font-size:16px;font-weight:800;cursor:pointer}
+.generate:disabled{opacity:.4;cursor:not-allowed}
+.note{font-size:12px;color:#777;text-align:center;line-height:1.6;margin-top:13px}
+.status{margin-top:18px;padding:15px;border:1px solid #252525;border-radius:12px;color:#aaa;font-size:13px;line-height:1.6}
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:25px}
+.feature{background:#0c0c0c;border:1px solid #202020;border-radius:13px;padding:16px;text-align:center}
+.feature b{display:block;font-size:13px;margin-bottom:7px}
+.feature small{color:#777;font-size:11px}
+footer{text-align:center;color:#555;padding:25px;border-top:1px solid #202020;font-size:12px}
+@media(max-width:700px){.panels{grid-template-columns:1fr}.features{grid-template-columns:1fr}.intro{margin-top:18px}header{padding:0 17px}}
 </style>
 </head>
 <body>
-<header><div class="logo">LIPFORGE AI</div></header>
+<header>
+  <div class="logo">LIPFORGE<span> AI</span></div>
+  <div class="counter">✦ <b id="credits">50</b> FREE GENERATIONS</div>
+</header>
+
 <main>
-
-<section class="panel" id="authPanel">
-<h1>Welcome to <span>LIPFORGE AI</span></h1>
-<p>Sign in or create your account.</p>
-
-<div id="loginForm">
-<label>Email address</label>
-<input id="email" type="email" placeholder="Your Gmail or email address">
-
-<label>Password</label>
-<div class="password-wrap">
-<input id="password" type="password" placeholder="Enter password">
-<button type="button" class="secondary" onclick="togglePassword('password',this)">Show</button>
-</div>
-
-<button id="login">Sign in</button>
-<button id="signup" class="secondary">Create account</button>
-<button id="forgot" class="link">Forgot password?</button>
-</div>
-
-<div id="verifyForm" class="hidden">
-<h2>Verify your email</h2>
-<p>Enter the verification code sent to your email inbox.</p>
-<label>Email verification code</label>
-<input id="verifyCode" inputmode="numeric" autocomplete="one-time-code" placeholder="Enter code">
-<button id="verifyButton">Verify email</button>
-<button id="resend" class="secondary">Resend code</button>
-</div>
-
-<div id="resetRequest" class="hidden">
-<h2>Reset password</h2>
-<p>We'll send a recovery code to your email address.</p>
-<label>Email address</label>
-<input id="resetEmail" type="email" placeholder="Your email address">
-<button id="sendReset">Send recovery code</button>
-<button class="secondary" onclick="showForm('loginForm')">Back to login</button>
-</div>
-
-<div id="resetForm" class="hidden">
-<h2>Create a new password</h2>
-<p>Enter the recovery code from your email and choose a new password.</p>
-<label>Recovery code</label>
-<input id="recoveryCode" inputmode="numeric" autocomplete="one-time-code" placeholder="Enter recovery code">
-<label>New password</label>
-<div class="password-wrap">
-<input id="newPassword" type="password" placeholder="New password">
-<button type="button" class="secondary" onclick="togglePassword('newPassword',this)">Show</button>
-</div>
-<label>Confirm new password</label>
-<div class="password-wrap">
-<input id="confirmPassword" type="password" placeholder="Confirm password">
-<button type="button" class="secondary" onclick="togglePassword('confirmPassword',this)">Show</button>
-</div>
-<button id="changePassword">Update password</button>
-</div>
-
-<div id="message" aria-live="polite"></div>
+<section class="intro">
+  <h1>Bring Every Word <span>To Life.</span></h1>
+  <p>Professional AI lip-sync studio. Upload your video and audio<br>and prepare them for realistic synchronization.</p>
 </section>
 
-<section id="dashboard" class="hidden">
-<div class="panel">
-<h2>Your account</h2>
-<p id="userEmail"></p>
-<p>Your available credits</p>
-<div class="credit" id="credits">Loading...</div>
-<button id="switchAccount" class="secondary">Switch account / Sign out</button>
-</div>
+<section class="panels">
+  <div class="panel">
+    <h2>01 — Source Video</h2>
+    <div class="sub">Choose the face video you want to synchronize.</div>
+    <label class="upload" for="videoFile">
+      <div><div class="icon">▶</div><strong>Upload your video</strong><small>MP4, MOV or WEBM</small></div>
+      <input id="videoFile" type="file" accept="video/mp4,video/quicktime,video/webm">
+    </label>
+    <video id="videoPreview" class="preview" controls playsinline></video>
+    <div id="videoInfo" class="fileinfo"></div>
+    <button class="remove" id="removeVideo">Remove video ×</button>
+  </div>
 
-<div class="panel">
-<h2>AI Lip Sync Studio</h2>
-<label>Original video</label>
-<input id="video" type="file" accept="video/*">
-<label>Audio file</label>
-<input id="audio" type="file" accept="audio/*">
-<button id="generate">Prepare generation</button>
-<div id="studioMessage"></div>
-</div>
+  <div class="panel">
+    <h2>02 — Audio Track</h2>
+    <div class="sub">Choose the speech or audio for the video.</div>
+    <label class="upload" for="audioFile">
+      <div><div class="icon">♫</div><strong>Upload your audio</strong><small>MP3, WAV, M4A or AAC</small></div>
+      <input id="audioFile" type="file" accept="audio/*">
+    </label>
+    <audio id="audioPreview" controls></audio>
+    <div id="audioInfo" class="fileinfo"></div>
+    <button class="remove" id="removeAudio">Remove audio ×</button>
+  </div>
 </section>
 
-<footer>© 2026 LIPFORGE AI</footer>
+<section class="actions">
+  <button class="generate" id="generate" disabled>PREPARE LIP-SYNC GENERATION →</button>
+  <p class="note">Best realism is the priority. Processing may take longer.<br>Your files are previewed locally in this browser.</p>
+  <div class="status" id="status">Upload a video and an audio file to get started. Your AI generation engine still needs to be connected.</div>
+</section>
+
+<section class="features">
+  <div class="feature"><b>Natural Mouth Movement</b><small>Designed for realistic speech synchronization</small></div>
+  <div class="feature"><b>Facial Consistency</b><small>Quality-focused processing goal</small></div>
+  <div class="feature"><b>Premium Studio</b><small>Simple, clean and mobile-friendly</small></div>
+</section>
 </main>
 
+<footer>© 2026 LIPFORGE AI · AI VIDEO STUDIO</footer>
+
 <script>
-const URL = "https://zxjntfornzjtzhvvdufw.supabase.co";
-const KEY = "sb_publishable_vQ_8NmjRuqGssL6vo5Ksyw_M61b4Hd3";
-const db = window.supabase.createClient(URL,KEY);
+const videoInput=document.getElementById('videoFile');
+const audioInput=document.getElementById('audioFile');
+const video=document.getElementById('videoPreview');
+const audio=document.getElementById('audioPreview');
+const button=document.getElementById('generate');
+const statusBox=document.getElementById('status');
 
-const $ = id => document.getElementById(id);
-let pendingEmail = "";
+let videoURL=null,audioURL=null;
 
-function msg(t){$("message").textContent=t;}
-
-function showForm(name){
-["loginForm","verifyForm","resetRequest","resetForm"].forEach(id=>{
-$(id).classList.add("hidden");
+function updateButton(){
+ button.disabled=!(videoURL&&audioURL);
+}
+function formatSize(bytes){
+ return (bytes/1024/1024).toFixed(1)+' MB';
+}
+videoInput.addEventListener('change',()=>{
+ const file=videoInput.files[0];
+ if(!file)return;
+ if(videoURL)URL.revokeObjectURL(videoURL);
+ videoURL=URL.createObjectURL(file);
+ video.src=videoURL;
+ video.style.display='block';
+ document.getElementById('videoInfo').textContent=file.name+' · '+formatSize(file.size);
+ document.getElementById('removeVideo').style.display='block';
+ updateButton();
+ statusBox.textContent='Video loaded. Now add your audio track.';
 });
-$(name).classList.remove("hidden");
-msg("");
-}
-
-function togglePassword(id,button){
-const field=$(id);
-const visible=field.type==="password";
-field.type=visible?"text":"password";
-button.textContent=visible?"Hide":"Show";
-}
-
-async function loadAccount(user){
-$("authPanel").classList.add("hidden");
-$("dashboard").classList.remove("hidden");
-$("userEmail").textContent=user.email||"";
-$("credits").textContent="Loading...";
-
-const {data,error}=await db.from("profiles")
-.select("credits").eq("id",user.id).maybeSingle();
-
-$("credits").textContent=error?"Unavailable":
-data?data.credits+" credits":"Profile not found";
-}
-
-function showLogin(){
-$("dashboard").classList.add("hidden");
-$("authPanel").classList.remove("hidden");
-showForm("loginForm");
-}
-
-$("signup").onclick=async()=>{
-const email=$("email").value.trim();
-const password=$("password").value;
-
-if(!email||password.length<6){
-msg("Enter a valid email and password of at least 6 characters.");
-return;
-}
-
-msg("Creating account...");
-const {data,error}=await db.auth.signUp({email,password});
-
-if(error){msg(error.message);return;}
-
-pendingEmail=email;
-showForm("verifyForm");
-
-if(data.session){
-msg("Account created and signed in.");
-await loadAccount(data.user);
-}else{
-msg("Check your email for the verification code.");
-}
-};
-
-$("verifyButton").onclick=async()=>{
-const token=$("verifyCode").value.trim();
-
-if(!pendingEmail||!token){msg("Enter your email verification code.");return;}
-
-msg("Verifying...");
-const {data,error}=await db.auth.verifyOtp({
-email:pendingEmail,
-token,
-type:"signup"
+audioInput.addEventListener('change',()=>{
+ const file=audioInput.files[0];
+ if(!file)return;
+ if(audioURL)URL.revokeObjectURL(audioURL);
+ audioURL=URL.createObjectURL(file);
+ audio.src=audioURL;
+ audio.style.display='block';
+ document.getElementById('audioInfo').textContent=file.name+' · '+formatSize(file.size);
+ document.getElementById('removeAudio').style.display='block';
+ updateButton();
+ statusBox.textContent='Audio loaded. Preview both files before continuing.';
 });
-
-if(error){msg(error.message);return;}
-
-msg("Email verified successfully!");
-await loadAccount(data.user);
-};
-
-$("resend").onclick=async()=>{
-if(!pendingEmail){msg("Please create your account again.");return;}
-msg("Sending a new code...");
-const {error}=await db.auth.resend({
-type:"signup",
-email:pendingEmail
+document.getElementById('removeVideo').addEventListener('click',()=>{
+ if(videoURL)URL.revokeObjectURL(videoURL);
+ videoURL=null;video.pause();video.removeAttribute('src');video.load();
+ video.style.display='none';videoInput.value='';
+ document.getElementById('videoInfo').textContent='';
+ document.getElementById('removeVideo').style.display='none';
+ updateButton();
 });
-msg(error?error.message:"A new verification code has been sent.");
-};
-
-$("login").onclick=async()=>{
-const email=$("email").value.trim();
-const password=$("password").value;
-if(!email||!password){msg("Enter your email and password.");return;}
-
-msg("Signing in...");
-const {data,error}=await db.auth.signInWithPassword({email,password});
-if(error){msg(error.message);return;}
-await loadAccount(data.user);
-};
-
-$("forgot").onclick=()=>{
-$("resetEmail").value=$("email").value.trim();
-showForm("resetRequest");
-};
-
-$("sendReset").onclick=async()=>{
-const email=$("resetEmail").value.trim();
-if(!email){msg("Enter your email address.");return;}
-
-msg("Sending recovery code...");
-const {error}=await db.auth.resetPasswordForEmail(email);
-
-if(error){msg(error.message);return;}
-
-pendingEmail=email;
-showForm("resetForm");
-msg("Check your email for the recovery code.");
-};
-
-$("changePassword").onclick=async()=>{
-const token=$("recoveryCode").value.trim();
-const password=$("newPassword").value;
-const confirm=$("confirmPassword").value;
-
-if(!token||!password){msg("Enter the recovery code and new password.");return;}
-if(password.length<6){msg("Password must have at least 6 characters.");return;}
-if(password!==confirm){msg("Your passwords do not match.");return;}
-
-msg("Verifying recovery code...");
-const {data,error}=await db.auth.verifyOtp({
-email:pendingEmail,
-token,
-type:"recovery"
+document.getElementById('removeAudio').addEventListener('click',()=>{
+ if(audioURL)URL.revokeObjectURL(audioURL);
+ audioURL=null;audio.pause();audio.removeAttribute('src');audio.load();
+ audio.style.display='none';audioInput.value='';
+ document.getElementById('audioInfo').textContent='';
+ document.getElementById('removeAudio').style.display='none';
+ updateButton();
 });
-
-if(error){msg(error.message);return;}
-
-const {error:updateError}=await db.auth.updateUser({password});
-
-if(updateError){msg(updateError.message);return;}
-
-msg("Password updated successfully. You can now sign in.");
-await db.auth.signOut();
-showLogin();
-};
-
-$("switchAccount").onclick=async()=>{
-if(!confirm("Sign out and switch to another account?"))return;
-const {error}=await db.auth.signOut();
-if(error){alert(error.message);return;}
-$("email").value="";
-$("password").value="";
-showLogin();
-};
-
-$("generate").onclick=()=>{
-if(!$("video").files[0]||!$("audio").files[0]){
-$("studioMessage").textContent="Upload both video and audio.";
-return;
-}
-$("studioMessage").textContent=
-"Files selected. The real AI processing server still needs to be connected.";
-};
-
-db.auth.onAuthStateChange((event,session)=>{
-if(session?.user)loadAccount(session.user);
-else showLogin();
+button.addEventListener('click',()=>{
+ statusBox.textContent='Your video and audio are ready. The AI lip-sync processing server has not been connected yet, so no generation has been started and no free generation has been used.';
 });
-
-(async()=>{
-const {data}=await db.auth.getSession();
-if(data.session?.user)await loadAccount(data.session.user);
-})();
 </script>
 </body>
 </html>
